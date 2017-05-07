@@ -2,15 +2,15 @@
 var stats = new Stats();
 var GAME_WIDTH = 768, GAME_HEIGHT = 768,
     PLAYER_VELOCITY = 3;
-var renderer, stage, gameState;
+var renderer, stage, gameState, player;
 
 /*
 * Player Object
 */
-var player = {
-  sprite: null,
-  vx: 0,
-  vy: 0,
+function Player(sprite) {
+  this.sprite = sprite ? sprite : null;
+  this.vx = 0;
+  this.vy = 0;
 };
 
 /*
@@ -39,10 +39,10 @@ function setup(){
   // Setup the stats monitor
   stats.showPanel(0);
 
-  // Create sprites
-  player.sprite = new PIXI.Sprite(
+  // Instantiate the player with player sprite
+  player = new Player(new PIXI.Sprite(
     PIXI.loader.resources["images/player-sprites/prototype-frog.png"].texture
-  );
+  ));
 
   //Create the renderer
   renderer = PIXI.autoDetectRenderer(GAME_WIDTH, GAME_HEIGHT);
