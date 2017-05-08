@@ -1,7 +1,8 @@
 // Globals
 var stats = new Stats();
-var GAME_WIDTH = 768, GAME_HEIGHT = 768,
-    PLAYER_VELOCITY = 3;
+const GAME_WIDTH = 768,
+      GAME_HEIGHT = 768,
+      PLAYER_VELOCITY = 3;
 var renderer, stage, gameState, player;
 
 /*
@@ -11,7 +12,20 @@ function Player(sprite) {
   this.sprite = sprite ? sprite : null;
   this.vx = 0;
   this.vy = 0;
-};
+}
+Player.prototype.attack = function(){
+  console.log("Player attack");
+}
+Player.prototype.eat = function(insect){
+  console.log("Player eats " + insect);
+}
+
+/*
+* Insect Object
+*/
+function Insect() {
+
+}
 
 /*
 * The PIXI game assets loader
@@ -111,7 +125,8 @@ function bindPlayerKeys(){
   var left = keyboard(37),
       up = keyboard(38),
       right = keyboard(39),
-      down = keyboard(40);
+      down = keyboard(40),
+      attack = keyboard(32);
 
   left.press = function() {
     player.vx = -PLAYER_VELOCITY;
@@ -148,4 +163,8 @@ function bindPlayerKeys(){
       player.vy = 0;
     }
   };
+
+  attack.press = function() {
+    player.attack();
+  }
 }
