@@ -15,6 +15,7 @@ const GAME_WIDTH = 900,
       INSECT_START_FLY = 3,
       INSECT_START_LADYBUG = 2,
       INSECT_START_WASP = 2,
+      INSECT_LADYBUG_SPAWN_CHANCE = 2, // out of 10
       MAP_CONTAINER = {
         x: 0,
         y: 0,
@@ -32,7 +33,13 @@ const GAME_WIDTH = 900,
           {x: GAME_WIDTH*7.5/10, y: GAME_HEIGHT*8/10, scale: 0.2, rotation: 6.00},
           {x: GAME_WIDTH*8/10, y: GAME_HEIGHT*8.7/10, scale: 0.13, rotation: 4.10},
         ]
-      };
+      },
+      STAGES_OF_DIFFICULTY = [
+        {time: 15, flies: 3, ladybugs: 2, wasps: 3},
+        {time: 30, flies: 4, ladybugs: 2, wasps: 4},
+        {time: 45, flies: 4, ladybugs: 1, wasps: 4},
+        {time: 60, flies: 3, ladybugs: 1, wasps: 5},
+      ];
 
 // Game object Globals
 var renderer, stage, titleScene, gameScene, gameOverScene, gameOverMessage, gameState, player, scoreKeeper,

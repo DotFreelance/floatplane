@@ -191,36 +191,69 @@ class Wasp extends Insect {
 class InsectSpawner {
   constructor(){
     this.insects = [];
-    this.flies = INSECT_START_FLY;
-    this.ladybugs = INSECT_START_LADYBUG;
-    this.wasps = INSECT_START_WASP;
+    this.flies = 0;
+    this.ladybugs = 0;
+    this.wasps = 0;
+    this.fliesMax = INSECT_START_FLY;
+    this.ladybugsMax = INSECT_START_LADYBUG;
+    this.waspsMax = INSECT_START_WASP;
   }
   initSpawn(){
     // Spawn initial flies
-    for(let i = 0; i < this.flies; i++){
+    for(let i = 0; i < this.fliesMax; i++){
       this.spawn(new Fly());
     }
     // Spawn initial ladybugs
-    for(let i = 0; i < this.ladybugs; i++){
+    for(let i = 0; i < this.ladybugsMax; i++){
       this.spawn(new Ladybug());
     }
     // Spawn initial wasps
-    for(let i = 0; i < this.wasps; i++){
+    for(let i = 0; i < this.waspsMax; i++){
       this.spawn(new Wasp());
     }
     // Initiate the spawn monitor
     gameTimer.addEvent(5, function(){
       insectSpawner.spawnMonitor();
     });
+    // Add all of the difficulty stages to the event list
+    for(let difficulty of STAGES_OF_DIFFICULTY){
+      gameTimer.addEvent(difficulty.time, function(spawner, difficultyStage){
+        // console.log("Difficulty Event at " + difficultyStage.time);
+        spawner.fliesMax = difficultyStage.flies;
+        spawner.ladybugsMax = difficultyStage.ladybugs;
+        spawner.waspsMax = difficultyStage.wasps;
+        // console.log("Now we have flies: " + spawner.fliesMax + " ladybugs: " + spawner.ladybugsMax + " wasps: " + spawner.waspsMax);
+      }, this, difficulty);
+    }
   }
   spawnMonitor(){
-    console.log("Spawnitor");
+    // console.log("Spawnitor");
+    let ladybugChance = getRandomInt(1, 10);
+    // console.log("ladybugchance = " + ladybugChance)
+    if(ladybugChance <= INSECT_LADYBUG_SPAWN_CHANCE && this.ladybugs < this.ladybugsMax){
+      this.spawn(new Ladybug());
+      // console.log("ladybugsMax: " + this.ladybugsMax + " ladybugs: " + this.ladybugs);
+    } else if(this.flies < this.fliesMax){
+      this.spawn(new Fly());
+      // console.log("fliesMax: " + this.fliesMax + " flies: " + this.flies);
+    }
+    if(this.wasps < this.waspsMax){
+      this.spawn(new Wasp());
+      // console.log("waspsMax: " + this.waspsMax + " wasps: " + this.wasps);
+    }
 
-    gameTimer.addEvent(5, function(){
+    gameTimer.addEvent(3, function(){
       insectSpawner.spawnMonitor();
     });
   }
   spawn(newInsect){
+    if(newInsect instanceof Fly){
+      this.flies++;
+    } else if(newInsect instanceof Ladybug){
+      this.ladybugs++;
+    } else if(newInsect instanceof Wasp){
+      this.wasps++;
+    }
     gameScene.addChild(newInsect.sprite);
     newInsect.sprite.position.set(GAME_WIDTH*getRandomInt(2, 9)/10, GAME_HEIGHT*getRandomInt(2, 9)/10);
     newInsect.sprite.displayGroup = interactiveGroup;
@@ -231,6 +264,11 @@ class InsectSpawner {
     // Remove from insects array
     let index = this.insects.indexOf(insect);
     if(index > -1){
+      if(insect instanceof Fly){
+        this.flies--;
+      } else if(insect instanceof Ladybug){
+        this.ladybugs--;
+      }
       this.insects.splice(index, 1);
     }
   }
