@@ -87,7 +87,11 @@ function bindPlayerKeys(){
   };
 
   attack.press = function() {
-    player.attack();
+    if(gameState == title){
+      startGame();
+    } else {
+      player.attack();
+    }
   }
 }
 
