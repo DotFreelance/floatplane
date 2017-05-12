@@ -94,7 +94,7 @@ function setup(){
   // Add the stats panel over the renderer
   document.body.appendChild(stats.dom);
   stats.dom.style.left = "60px";
-  stats.dom.style.top = "105px";
+  stats.dom.style.top = "135px";
 
   // Setup player controls
   bindPlayerKeys();
