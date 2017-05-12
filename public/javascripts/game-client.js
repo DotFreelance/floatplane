@@ -135,21 +135,22 @@ function title(){
 * The play-state action loop
 */
 function play(){
-
+  // Frame delta
+  let delta = gameTimer.getDelta();
   /*
   * Player
   */
   // Run attack sequence
   if(player.attacking){
-    playerAttackAnimation();
+    playerAttackAnimation(delta);
   }
   // Apply movement and rotation, checking that we're within game bounds
   else if(!contain(player.sprite, MAP_CONTAINER)){
     // Apply player direction
     player.sprite.rotation = player.vx == 0 && player.vy == 0 ? player.sprite.rotation : Math.atan2(player.vx, -player.vy);
     // Move player
-    player.sprite.x += player.vx;
-    player.sprite.y += player.vy
+    player.sprite.x += player.vx * (delta / 1000);
+    player.sprite.y += player.vy * (delta / 1000);
   }
   /*
   * insects
@@ -169,8 +170,8 @@ function play(){
       insect.vx *= -1;
     } else {
       // Move insect
-      insect.sprite.x += insect.vx;
-      insect.sprite.y += insect.vy
+      insect.sprite.x += insect.vx * (delta / 1000);
+      insect.sprite.y += insect.vy * (delta / 1000);
     }
     // Apply insect direction
     insect.sprite.rotation = insect.vx == 0 && insect.vy == 0 ? insect.sprite.rotation : Math.atan2(insect.vx, -insect.vy);
@@ -187,10 +188,11 @@ function end(){
 /*
 * Player attack animation
 */
-function playerAttackAnimation(){
-  player.attackCounter++;
-  var t = player.attackCounter / PLAYER_ATTACK_ANIMATION_LENGTH;
-  if(player.attackCounter == 1){
+function playerAttackAnimation(delta){
+  let prevAttackCounter = player.attackCounter;
+  player.attackCounter += (delta / 1000);
+  let t = player.attackCounter / PLAYER_ATTACK_ANIMATION_LENGTH;
+  if(prevAttackCounter == 0){
     // Create the two parts of the tongue
     playerTongue = new PIXI.Graphics();
     playerTongueTip = new PIXI.Graphics();

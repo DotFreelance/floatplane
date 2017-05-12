@@ -37,6 +37,7 @@ class Timer {
   constructor(){
     this._start = (new Date()).getTime();
     this._time = 0;
+    this._delta = 0;
     this._events = [];
     this._timerMessage = new PIXI.Text(
       "Time: 00:00",
@@ -60,6 +61,12 @@ class Timer {
   getSeconds(){
     return Math.floor(this._time / 1000);
   }
+  getDelta(){
+    let current = (new Date()).getTime();
+    let delta = current - this._delta;
+    this._delta = current;
+    return delta;
+  }
   updateTimer(){
     // Update the externally available time property
     this._time = (new Date()).getTime() - this._start;
@@ -77,6 +84,7 @@ class Timer {
   }
   start(){
     this._interval = this.setInterval(this.updateTimer, 100);
+    this._delta = (new Date()).getTime();
   }
   stop(){
     clearInterval(this._interval);
