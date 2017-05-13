@@ -36,6 +36,9 @@ function setup(){
   // Create the stage
   stage = new PIXI.Container();
 
+  // Create the UI scene
+  uiScene = new PIXI.Container();
+
   // Create the title scene
   titleScene = new PIXI.Container();
 
@@ -50,7 +53,7 @@ function setup(){
     PIXI.loader.resources["images/ui-sprites/bog-brunch-title.png"].texture
   );
   titleLogo.anchor.set(0.5);
-  titleLogo.position.set(GAME_WIDTH/2, GAME_HEIGHT/2-titleLogo.height/2);
+  titleLogo.position.set(GAME_WIDTH/2+20, GAME_HEIGHT/2.5-titleLogo.height/2);
   titleScene.addChild(titleLogo);
 
   // Play button
@@ -61,18 +64,11 @@ function setup(){
   playButton.buttonMode = true;
   playButton.on("pointerdown", startGame);
   playButton.anchor.set(0.5);
-  playButton.position.set(GAME_WIDTH/2, GAME_HEIGHT/2+playButton.height/2);
+  playButton.position.set(GAME_WIDTH/2, GAME_HEIGHT/2.5+playButton.height/2);
   titleScene.addChild(playButton);
 
-  // Add the game over message to the end scene
-  gameOverMessage = new PIXI.Text(
-    "GAME OVER!",
-    {fontFamily: "Arial", fontSize: 60, fill: "white"}
-  );
-  gameOverMessage.position.set(GAME_WIDTH/2-gameOverMessage.width/2, GAME_HEIGHT/2-gameOverMessage.height/2);
-  gameOverScene.addChild(gameOverMessage);
-
   // Add the scenes to the stage
+  stage.addChild(uiScene);
   stage.addChild(titleScene);
   stage.addChild(gameScene);
   stage.addChild(gameOverScene);
@@ -89,18 +85,16 @@ function setup(){
   renderer.view.style.border = "1px dashed black";
 
   //Add the canvas to the HTML document
-  document.body.appendChild(renderer.view);
+  document.getElementById("gameContainer").appendChild(renderer.view);
 
   // Add the stats panel over the renderer
-  document.body.appendChild(stats.dom);
-  stats.dom.style.left = "60px";
-  stats.dom.style.top = "135px";
+  document.getElementById("stats-overlay").appendChild(stats.dom);
+  stats.dom.style.position = "absolute";
+  stats.dom.style.left = "4px";
+  stats.dom.style.top = "4px";
 
-  // Setup player controls
-  bindPlayerKeys();
-
-  // Set the game state
-  gameState = title;
+  // Initialize the game
+  initGame();
 
   // Begin running the game
   renderLoop();
@@ -125,10 +119,7 @@ function renderLoop(){
 * The title intro
 */
 function title(){
-  titleScene.visible = true;
-  gameScene.visible = false;
-  gameOverScene.visible = false;
-  renderer.backgroundColor = GAME_TITLE_BACKGROUND_COLOR;
+  // Title scene has no rendering tasks
 }
 
 /*
@@ -182,7 +173,7 @@ function play(){
 * The game-end action loop
 */
 function end(){
-  // Just displays the existing message
+  // End game scene has no rendering tasks
 }
 
 /*
@@ -263,9 +254,40 @@ function staticSpriteLayout(){
 }
 
 /*
+* Initialize the game with the necessary objects
+*/
+function initGame(){
+  // Bind the keys for the title screen
+  bindTitleKeys();
+
+  // Setup the title screen
+  titleScene.visible = true;
+  gameScene.visible = false;
+  gameOverScene.visible = false;
+  renderer.backgroundColor = GAME_TITLE_BACKGROUND_COLOR;
+
+  // Set the game state
+  gameState = title;
+}
+
+/*
+* Reset the game
+*/
+function resetGame(){
+  // Clear scenes
+  gameScene.removeChildren();
+  uiScene.removeChildren();
+  // Initialize a new game
+  initGame();
+}
+
+/*
 * Set up the game to begin
 */
 function startGame(){
+  // Setup player controls
+  bindPlayerKeys();
+
   // Lay out the static sprites
   staticSpriteLayout();
 
@@ -306,6 +328,17 @@ function endGame(){
   gameOverScene.visible = true;
   // Set the background
   renderer.backgroundColor = GAME_OVER_BACKGROUND_COLOR;
+  // Add the game over message to the end scene
+  gameOverMessage = new PIXI.Text(
+    "GAME OVER!",
+    {fontFamily: GAME_FONT, fontSize: 60, fill: "white"}
+  );
+  gameOverMessage.position.set(GAME_WIDTH/2-gameOverMessage.width/2, GAME_HEIGHT/2-gameOverMessage.height);
+  gameOverScene.addChild(gameOverMessage);
+  // Create a score ScoreSubmitter
+  scoreSubmitter = new ScoreSubmitter();
+  // Bind the end-game keys
+  bindEndKeys();
   // Stop the timer and set to end
   gameTimer.stop();
   gameTimer.whiteText();

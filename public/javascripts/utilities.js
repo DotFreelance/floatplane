@@ -31,19 +31,86 @@ function keyboard(keyCode) {
   };
 
   //Attach event listeners
+  key.downEvent = key.downHandler.bind(key);
+  key.upEvent = key.upHandler.bind(key);
   window.addEventListener(
-    "keydown", key.downHandler.bind(key), false
+    "keydown", key.downEvent, false
   );
   window.addEventListener(
-    "keyup", key.upHandler.bind(key), false
+    "keyup", key.upEvent, false
   );
+
+  boundKeys.push(key);
+
   return key;
+}
+
+/*
+* Unbind all keys so we can start fresh
+*/
+function unbindAllKeys(){
+  // Remove event listeners
+  for(let boundKey of boundKeys){
+    window.removeEventListener(
+      "keydown", boundKey.downEvent, false
+    );
+    window.removeEventListener(
+      "keyup", boundKey.upEvent, false
+    );
+  }
+  boundKeys = [];
+}
+
+/*
+* Title Screen key-binding procedure
+*/
+function bindTitleKeys(){
+  unbindAllKeys();
+
+  // Space or enter to start the game
+  keyboard(32).press = function() {
+    startGame();
+  }
+  keyboard(13).press = function() {
+    startGame();
+  }
+}
+
+/*
+* End Screen key-binding procedure
+*/
+function bindEndKeys(){
+  unbindAllKeys();
+
+  // Letters
+  for(let i = 65; i <= 90; i++){
+    keyboard(i).press = function() {
+      scoreSubmitter.typeLetter(i);
+    }
+  }
+  // Numbers
+  for(let i = 48; i <= 57; i++){
+    keyboard(i).press = function() {
+      scoreSubmitter.typeLetter(i);
+    }
+  }
+  // Backspace
+  keyboard(8).press = function() {
+    scoreSubmitter.eraseLetter();
+  }
+  // Enter to submit
+  keyboard(13).press = function() {
+    scoreSubmitter.submit();
+    resetGame();
+  }
 }
 
 /*
 * Player key-binding procedure
 */
 function bindPlayerKeys(){
+  unbindAllKeys();
+
   var left = keyboard(37),
       up = keyboard(38),
       right = keyboard(39),
@@ -87,11 +154,7 @@ function bindPlayerKeys(){
   };
 
   attack.press = function() {
-    if(gameState == title){
-      startGame();
-    } else {
-      player.attack();
-    }
+    player.attack();
   }
 }
 

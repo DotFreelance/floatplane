@@ -2,14 +2,16 @@ doctype html
 html
   head
     title= title
+    link(rel='stylesheet', href='/stylesheets/MyFontsWebfontsKit.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
     block content
-    script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js')
-    script(type='text/javascript' src='javascripts/pixi-display.js')
-    script(type='text/javascript' src='javascripts/stats.min.js')
-    // Custom code
-    script(type='text/javascript' src='javascripts/globals.js')
-    script(type='text/javascript' src='javascripts/classes.js')
-    script(type='text/javascript' src='javascripts/utilities.js')
-    script(type='text/javascript' src='javascripts/game-client.js')
+    div(id='scripts')
+      script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js')
+      script(type='text/javascript' src='javascripts/pixi-display.js')
+      script(type='text/javascript' src='javascripts/stats.min.js')
+      // Custom code
+      script(type='text/javascript' src='javascripts/globals.js')
+      script(type='text/javascript' src='javascripts/classes.js')
+      script(type='text/javascript' src='javascripts/utilities.js')
+      script(type='text/javascript' src='javascripts/game-client.js')

@@ -6,3 +6,45 @@ body {
 a {
   color: #00B7FF;
 }
+
+#mainContainer {
+  position: relative;
+}
+
+#gameContainer {
+  position: relative;
+  display: inline-block;
+  float: left;
+}
+
+#highScores {
+  margin-left: 50px;
+  margin-bottom: 50px;
+  display: inline-block;
+  float: left;
+}
+#highScores > h1 {
+  font-family: "BadMedicine-Regular";
+  text-align: center;
+  font-size: 32pt;
+  margin-bottom: 0;
+}
+#highScores > table {
+  border-collapse: collapse;
+  border-spacing: 0px;
+  border-bottom: 1px solid white;
+  background: darkred;
+}
+#highScores > table, th, td {
+  padding: 5px 15px;
+  font-family: "BadMedicine-Regular";
+  color: white;
+}
+#highScores > table th {
+  font-size: 24pt;
+}
+#highScores > table tr {
+  border-top: 1px solid white;
+  font-size: 18pt;
+  text-align: center;
+}
