@@ -8,7 +8,7 @@ development: {
 production: {
   // heroku mongodb
   database: {
-    host: '127.0.0.1',
+    host: process.env.MONGODB_URI,
   }
 }
 };
