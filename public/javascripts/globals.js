@@ -3,6 +3,8 @@ const GAME_WIDTH = 900,
       GAME_TITLE_BACKGROUND_COLOR = 0x000000,
       GAME_BACKGROUND_COLOR = 0xCEEAE9,
       GAME_OVER_BACKGROUND_COLOR = 0x000000,
+      GAME_FONT = "BadMedicine-Regular",
+      PLAYER_NO_NAME = "unnamed",
       PLAYER_VELOCITY = 200,
       PLAYER_TONGUE_COLOR = 0xFF9999,
       PLAYER_TONGUE_WIDTH = 24,
@@ -42,8 +44,9 @@ const GAME_WIDTH = 900,
       ];
 
 // Game object Globals
-var renderer, stage, titleScene, gameScene, gameOverScene, gameOverMessage, gameState, player, scoreKeeper,
-    gameTimer, insectSpawner, playerTongue, playerTongueTip, testInsect;
+var renderer, stage, titleScene, uiScene, gameScene, gameOverScene, gameOverMessage, gameState, player, scoreKeeper,
+    scoreSubmitter, gameTimer, insectSpawner, playerTongue, playerTongueTip, testInsect;
+var boundKeys = [];
 
 // Global Groups
 var tongueGroup = null;

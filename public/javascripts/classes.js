@@ -41,12 +41,12 @@ class Timer {
     this._events = [];
     this._timerMessage = new PIXI.Text(
       "Time: 00:00",
-      {fontFamily: "Arial", fontSize: 32, fill: "black"}
+      {fontFamily: GAME_FONT, fontSize: 32, fill: "black"}
     );
     this._interval = null;
     // Add the timer to the gameScene on creation
     this._timerMessage.position.set(GAME_WIDTH-this._timerMessage.width-10, this._timerMessage.height+20);
-    stage.addChild(this._timerMessage);
+    uiScene.addChild(this._timerMessage);
 
     // Create a custom variant of setInterval to solve the "this" problem
     // Modified from: https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/setInterval#The_this_problem
@@ -90,10 +90,10 @@ class Timer {
     clearInterval(this._interval);
   }
   whiteText(){
-    this._timerMessage.style = {fontFamily: "Arial", fontSize: 32, fill: "white"};
+    this._timerMessage.style = {fontFamily: GAME_FONT, fontSize: 32, fill: "white"};
   }
   blackText(){
-    this._timerMessage.style = {fontFamily: "Arial", fontSize: 32, fill: "black"};
+    this._timerMessage.style = {fontFamily: GAME_FONT, fontSize: 32, fill: "black"};
   }
   addEvent(secondsFromNow, toExecute){
     this._events.push({created: this._time, seconds: secondsFromNow, toExecute: toExecute, params: Array.prototype.slice.call(arguments, 2)});
@@ -116,10 +116,10 @@ class ScoreKeeper {
     this.score = 0;
     this.scoreMessage = new PIXI.Text(
       "Score: " + this.score,
-      {fontFamily: "Arial", fontSize: 32, fill: "black"}
+      {fontFamily: GAME_FONT, fontSize: 32, fill: "black"}
     );
     this.scoreMessage.position.set(GAME_WIDTH-this.scoreMessage.width-10, 10);
-    stage.addChild(this.scoreMessage);
+    uiScene.addChild(this.scoreMessage);
   }
   addToScore(points){
     this.score += points;
@@ -127,10 +127,50 @@ class ScoreKeeper {
     this.scoreMessage.position.x = GAME_WIDTH-this.scoreMessage.width-10;
   }
   whiteText(){
-    this.scoreMessage.style = {fontFamily: "Arial", fontSize: 32, fill: "white"};
+    this.scoreMessage.style = {fontFamily: GAME_FONT, fontSize: 32, fill: "white"};
   }
   blackText(){
-    this.scoreMessage.style = {fontFamily: "Arial", fontSize: 32, fill: "black"};
+    this.scoreMessage.style = {fontFamily: GAME_FONT, fontSize: 32, fill: "black"};
+  }
+}
+
+/*
+* ScoreSubmitter Object
+*/
+class ScoreSubmitter {
+  constructor(){
+    this.name = "_";
+    this.submitted = false;
+    this.nameEntryMessage = new PIXI.Text(
+      "Name: " + this.name,
+      {fontFamily: GAME_FONT, fontSize: 32, fill: "white"}
+    );
+    this.nameEntryMessage.position.set(GAME_WIDTH/2-this.nameEntryMessage.width/2, GAME_HEIGHT/2-this.nameEntryMessage.height/2+50);
+    uiScene.addChild(this.nameEntryMessage);
+  }
+  typeLetter(asciiCode){
+    if(this.name.length >= 21) return;
+    this.name = this.name.substring(0, this.name.length-1) + String.fromCharCode(asciiCode) + "_";
+    this.nameEntryMessage.text = "Name: " + this.name;
+    this.nameEntryMessage.position.x = GAME_WIDTH/2-this.nameEntryMessage.width/2;
+  }
+  eraseLetter(){
+    this.name = this.name.substring(0, this.name.length-2) + "_";
+    this.nameEntryMessage.text = "Name: " + this.name;
+    this.nameEntryMessage.position.x = GAME_WIDTH/2-this.nameEntryMessage.width/2;
+  }
+  submit(){
+    if(!this.submitted){
+      this.submitted = true;
+      let xhr = new XMLHttpRequest();
+      xhr.open("POST", "/api/highscores", true);
+      xhr.setRequestHeader("Content-type", "application/json");
+      xhr.send(JSON.stringify({
+        playerName: this.name.length > 1 ? this.name.substring(0, this.name.length-1) : PLAYER_NO_NAME,
+        playerScore: scoreKeeper.score,
+        playerTime: gameTimer.getSeconds()
+      }));
+    }
   }
 }
 
@@ -226,28 +266,21 @@ class InsectSpawner {
     // Add all of the difficulty stages to the event list
     for(let difficulty of STAGES_OF_DIFFICULTY){
       gameTimer.addEvent(difficulty.time, function(spawner, difficultyStage){
-        // console.log("Difficulty Event at " + difficultyStage.time);
         spawner.fliesMax = difficultyStage.flies;
         spawner.ladybugsMax = difficultyStage.ladybugs;
         spawner.waspsMax = difficultyStage.wasps;
-        // console.log("Now we have flies: " + spawner.fliesMax + " ladybugs: " + spawner.ladybugsMax + " wasps: " + spawner.waspsMax);
       }, this, difficulty);
     }
   }
   spawnMonitor(){
-    // console.log("Spawnitor");
     let ladybugChance = getRandomInt(1, 10);
-    // console.log("ladybugchance = " + ladybugChance)
     if(ladybugChance <= INSECT_LADYBUG_SPAWN_CHANCE && this.ladybugs < this.ladybugsMax){
       this.spawn(new Ladybug());
-      // console.log("ladybugsMax: " + this.ladybugsMax + " ladybugs: " + this.ladybugs);
     } else if(this.flies < this.fliesMax){
       this.spawn(new Fly());
-      // console.log("fliesMax: " + this.fliesMax + " flies: " + this.flies);
     }
     if(this.wasps < this.waspsMax){
       this.spawn(new Wasp());
-      // console.log("waspsMax: " + this.waspsMax + " wasps: " + this.wasps);
     }
 
     gameTimer.addEvent(3, function(){

@@ -1,5 +1,26 @@
 extends layout
 
 block content
+  h3 Instructions: Use your #[strong arrow keys] to move, #[strong space bar] to lash your tongue. #[strong Watch out for wasps!]
   p This game uses #[a(href='http://www.pixijs.com/') Pixi.js] as a framework on WebGL and Canvas. #[strong This game will invoke your GPU!]
-  p Use your arrow keys to move, space bar to lash your tongue. Watch out for wasps!
+  div(id='mainContainer')
+    div(id='gameContainer')
+      div(id='stats-overlay')
+    div(id='highScores')
+      h1 High Scores
+      table
+        thead
+          tr
+            th Player
+            th Score
+            th Time
+        tbody
+          each score in highscores
+            tr
+              - var minutes = Math.floor(score.playerTime / 60);
+              - var seconds = score.playerTime % 60;
+              - seconds = seconds < 10 ? "0" + seconds : seconds
+              td= score.playerName
+              td= score.playerScore
+              td= minutes + ":" + seconds
+        
