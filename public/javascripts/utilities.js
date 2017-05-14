@@ -74,6 +74,10 @@ function bindTitleKeys(){
   keyboard(13).press = function() {
     startGame();
   }
+  // M to mute/unmute audio
+  keyboard(77).press = function() {
+    audioHelper.isMuted() ? audioHelper.unmute() : audioHelper.mute();
+  }
 }
 
 /*
@@ -155,6 +159,10 @@ function bindPlayerKeys(){
 
   attack.press = function() {
     player.attack();
+  }
+  // M to mute/unmute audio
+  keyboard(77).press = function() {
+    audioHelper.isMuted() ? audioHelper.unmute() : audioHelper.mute();
   }
 }
 

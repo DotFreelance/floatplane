@@ -20,7 +20,9 @@ class Player {
     this.attacking = true;
   }
   eat(insect){
+    audioHelper.tongueSound();
     if(insect.isEnemy){
+      audioHelper.waspHitSound();
       endGame();
     } else {
       scoreKeeper.addToScore(insect.pointValue);
@@ -170,6 +172,175 @@ class ScoreSubmitter {
         playerScore: scoreKeeper.score,
         playerTime: gameTimer.getSeconds()
       }));
+    }
+  }
+}
+
+/*
+* AudioHelper Object
+*/
+class AudioHelper {
+  constructor(muteState){
+    // Music
+    this.introMusic = sounds['audio/music/BogBrunchIntroSong.mp3'];
+    this.introMusic.loop = true;
+    this.introMusic.volume = 0.2;
+
+    this.gameMusic = sounds['audio/music/BBGameMusic.mp3'];
+    this.gameMusic.loop = true;
+    this.gameMusic.volume = 0.5;
+
+    this.gameBgAudio = sounds['audio/music/coolcrickets.mp3'];
+    this.gameBgAudio.loop = true;
+    this.gameBgAudio.volume = 0.5;
+
+    // Sound Effects
+    this.tongue = sounds['audio/sound-effects/tongue-sound.mp3'];
+
+    this.waspHit = sounds['audio/sound-effects/wasp-hit-sound.mp3'];
+
+    // Mute/Unmute button-icon
+    this.whiteOn = new PIXI.Sprite(
+      PIXI.loader.resources["images/ui-sprites/audio-on-white.png"].texture
+    );
+    this.whiteOff = new PIXI.Sprite(
+      PIXI.loader.resources["images/ui-sprites/audio-off-white.png"].texture
+    );
+    this.blackOn = new PIXI.Sprite(
+      PIXI.loader.resources["images/ui-sprites/audio-on-black.png"].texture
+    );
+    this.blackOff = new PIXI.Sprite(
+      PIXI.loader.resources["images/ui-sprites/audio-off-black.png"].texture
+    );
+
+    this.whiteOn.anchor.set(0.5);
+    this.whiteOff.anchor.set(0.5);
+    this.blackOn.anchor.set(0.5);
+    this.blackOff.anchor.set(0.5);
+
+    this.whiteOn.scale.set(0.2);
+    this.whiteOff.scale.set(0.2);
+    this.blackOn.scale.set(0.2);
+    this.blackOff.scale.set(0.2);
+
+    this.whiteOn.position.set(GAME_WIDTH/2, 30);
+    this.whiteOff.position.set(GAME_WIDTH/2, 30);
+    this.blackOn.position.set(GAME_WIDTH/2, 30);
+    this.blackOff.position.set(GAME_WIDTH/2, 30);
+
+    // Make the buttons clickable
+    this.whiteOn.interactive = true;
+    this.whiteOn.buttonMode = true;
+    this.whiteOn.on("pointerdown", function(){ audioHelper.mute(); });
+    this.whiteOff.interactive = true;
+    this.whiteOff.buttonMode = true;
+    this.whiteOff.on("pointerdown", function(){ audioHelper.unmute(); });
+    this.blackOn.interactive = true;
+    this.blackOn.buttonMode = true;
+    this.blackOn.on("pointerdown", function(){ audioHelper.mute(); });
+    this.blackOff.interactive = true;
+    this.blackOff.buttonMode = true;
+    this.blackOff.on("pointerdown", function(){ audioHelper.unmute(); });
+
+    uiScene.addChild(this.whiteOn);
+    uiScene.addChild(this.whiteOff);
+    uiScene.addChild(this.blackOn);
+    this.blackOn.visible = false;
+    uiScene.addChild(this.blackOff);
+    this.blackOff.visible = false;
+
+    // Default to white icons
+    this.audioOnButton = this.whiteOn;
+    this.audioOffButton = this.whiteOff;
+
+    let isAlreadyMuted = muteState == null ? false : muteState;
+    if(isAlreadyMuted){
+      this.audioOnButton.visible = false;
+      this.audioOffButton.visible = true;
+    } else {
+      this.audioOnButton.visible = true;
+      this.audioOffButton.visible = false;
+    }
+    this._mute = isAlreadyMuted;
+  }
+  mute(){
+    this.gameMusic.pause();
+    this.gameBgAudio.pause();
+    this.introMusic.pause();
+    this._mute = true;
+    this.audioOnButton.visible = false;
+    this.audioOffButton.visible = true;
+  }
+  unmute(){
+    switch (gameState) {
+      case play:
+      case end:
+        this.gameMusic.play();
+        this.gameBgAudio.play();
+        break;
+      case title:
+        this.introMusic.play();
+        break;
+    }
+    this._mute = false;
+    this.audioOnButton.visible = true;
+    this.audioOffButton.visible = false;
+  }
+  whiteIcons(){
+    // Set the white icons to visible or not depending on mute state
+    this.whiteOn.visible = this.audioOnButton.visible;
+    this.whiteOff.visible = this.audioOffButton.visible;
+    // Assign the audiobuttons to be the white icons
+    this.audioOnButton = this.whiteOn;
+    this.audioOffButton = this.whiteOff;
+    // Hide the black icons
+    this.blackOn.visible = false;
+    this.blackOff.visible = false;
+  }
+  blackIcons(){
+    // Set the black icons to visible or not depending on mute state
+    this.blackOn.visible = this.audioOnButton.visible;
+    this.blackOff.visible = this.audioOffButton.visible;
+    // Assign the audiobuttons to be the black icons
+    this.audioOnButton = this.blackOn;
+    this.audioOffButton = this.blackOff;
+    // Hide the white icons
+    this.whiteOn.visible = false;
+    this.whiteOff.visible = false;
+  }
+  isMuted(){
+    return this._mute;
+  }
+  startGameMusic(){
+    if(!this._mute){
+      // Fade out intro audio, fade in game audio
+      this.introMusic.fadeOut(2);
+      this.gameMusic.volume = 0.1;
+      this.gameMusic.playFrom(0);
+      this.gameMusic.fade(0.5, 2);
+      this.gameBgAudio.playFrom(0);
+    }
+  }
+  stopGameMusic(){
+    this.gameMusic.pause();
+    this.gameBgAudio.pause();
+  }
+  startIntroMusic(){
+    if(!this._mute){
+      this.introMusic.playFrom(0);
+    }
+  }
+  stopIntroMusic(){
+    this.introMusic.pause();
+  }
+  tongueSound(){
+    if(!this._mute){
+      this.tongue.play();
+    }
+  }
+  waspHitSound(){
+    if(!this._mute){
+      this.waspHit.play();
     }
   }
 }

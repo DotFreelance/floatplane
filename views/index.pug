@@ -1,7 +1,7 @@
 extends layout
 
 block content
-  h3 Instructions: Use your #[strong arrow keys] to move, #[strong space bar] to lash your tongue. #[strong Watch out for wasps!]
+  h3 Instructions: 'M' or click to mute audio. Use your #[strong arrow keys] to move, #[strong space bar] to lash your tongue. #[strong Watch out for wasps!]
   p This game uses #[a(href='http://www.pixijs.com/') Pixi.js] as a framework on WebGL and Canvas. #[strong This game will invoke your GPU!]
   div(id='mainContainer')
     div(id='gameContainer')
@@ -23,4 +23,7 @@ block content
               td= score.playerName
               td= score.playerScore
               td= minutes + ":" + seconds
+  div(id='footer')
+    p #[strong Music Modified from Original Production, By:] 
+    | Spy Real High by Admiral Bob (c) copyright 2017 Licensed under a Creative Commons Attribution Noncommercial (3.0) license. http://dig.ccmixter.org/files/admiralbob77/55913 Ft: Quarkstar
         
