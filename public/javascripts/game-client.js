@@ -94,7 +94,7 @@ function setup(){
   playButton.buttonMode = true;
   playButton.on("pointerdown", startGame);
   playButton.anchor.set(0.5);
-  playButton.position.set(GAME_WIDTH/2, GAME_HEIGHT/2.5+playButton.height/2);
+  playButton.position.set(GAME_WIDTH/2, GAME_HEIGHT/2.3+playButton.height/2);
   titleScene.addChild(playButton);
 
   // Add the scenes to the stage
@@ -108,6 +108,7 @@ function setup(){
   tongueGroup = new PIXI.DisplayGroup(0, true);
   interactiveGroup = new PIXI.DisplayGroup(1, true);
   staticGroup = new PIXI.DisplayGroup(-1, true);
+  rippleGroup = new PIXI.DisplayGroup(-2, true);
 
   //Create the renderer
   renderer = PIXI.autoDetectRenderer(GAME_WIDTH, GAME_HEIGHT);
@@ -122,6 +123,9 @@ function setup(){
   stats.dom.style.position = "absolute";
   stats.dom.style.left = "4px";
   stats.dom.style.top = "4px";
+
+  // Start the scoreboard refresher
+  window.setInterval(updateScoreboard, 10000);
 
   // Initialize the game
   initGame();
@@ -174,7 +178,7 @@ function play(){
     player.sprite.y += player.vy * (delta / 1000);
   }
   /*
-  * insects
+  * Insects
   */
   for(let insect of insectSpawner.insects){
     // Check for collision between player and enemy
@@ -198,6 +202,10 @@ function play(){
     // Apply insect direction
     insect.sprite.rotation = insect.vx == 0 && insect.vy == 0 ? insect.sprite.rotation : Math.atan2(insect.vx, -insect.vy);
   }
+  /*
+  * Ripples
+  */
+  rippleSpawner.animateAll(delta);
 }
 
 /*
@@ -332,11 +340,11 @@ function startGame(){
   // Use black audio icons
   audioHelper.blackIcons();
 
-  // Create the scorekeeper
-  scoreKeeper = new ScoreKeeper();
-
   // Create the timer
   gameTimer = new Timer();
+
+  // Create the scorekeeper
+  scoreKeeper = new ScoreKeeper();
 
   // Instantiate the player with player sprite
   player = new Player();
@@ -347,6 +355,10 @@ function startGame(){
   // Create InsectSpawner and initialize the gameboard with spawns
   insectSpawner = new InsectSpawner();
   insectSpawner.initSpawn();
+
+  // Spawn some ripples
+  rippleSpawner = new RippleSpawner();
+  rippleSpawner.initSpawn();
 
   // Start the main music
   audioHelper.startGameMusic();
@@ -377,7 +389,7 @@ function endGame(){
   // Add the game over message to the end scene
   gameOverMessage = new PIXI.Text(
     "GAME OVER!",
-    {fontFamily: GAME_FONT, fontSize: 60, fill: "white"}
+    {fontFamily: GAME_FONT, fontSize: 60, fill: 0xEA212E}
   );
   gameOverMessage.position.set(GAME_WIDTH/2-gameOverMessage.width/2, GAME_HEIGHT/2-gameOverMessage.height);
   gameOverScene.addChild(gameOverMessage);

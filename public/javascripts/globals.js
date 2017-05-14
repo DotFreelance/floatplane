@@ -4,6 +4,7 @@ const GAME_WIDTH = 900,
       GAME_BACKGROUND_COLOR = 0xCEEAE9,
       GAME_OVER_BACKGROUND_COLOR = 0x000000,
       GAME_FONT = "BadMedicine-Regular",
+      HITBOX_SIZE_FACTOR = 0.7,
       PLAYER_NO_NAME = "unnamed",
       PLAYER_VELOCITY = 200,
       PLAYER_TONGUE_COLOR = 0xFF9999,
@@ -45,7 +46,7 @@ const GAME_WIDTH = 900,
 
 // Game object Globals
 var renderer, stage, titleScene, uiScene, gameScene, gameOverScene, gameOverMessage, gameState, player, scoreKeeper,
-    scoreSubmitter, gameTimer, insectSpawner, playerTongue, playerTongueTip, testInsect, audioHelper;
+    scoreSubmitter, gameTimer, insectSpawner, playerTongue, playerTongueTip, testInsect, audioHelper, rippleSpawner;
 var boundKeys = [];
 var loaderChecklist = {
   graphics: false,

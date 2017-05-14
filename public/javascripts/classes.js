@@ -162,17 +162,19 @@ class ScoreSubmitter {
     this.nameEntryMessage.position.x = GAME_WIDTH/2-this.nameEntryMessage.width/2;
   }
   submit(){
-    if(!this.submitted){
-      this.submitted = true;
-      let xhr = new XMLHttpRequest();
-      xhr.open("POST", "/api/highscores", true);
-      xhr.setRequestHeader("Content-type", "application/json");
-      xhr.send(JSON.stringify({
-        playerName: this.name.length > 1 ? this.name.substring(0, this.name.length-1) : PLAYER_NO_NAME,
-        playerScore: scoreKeeper.score,
-        playerTime: gameTimer.getSeconds()
-      }));
-    }
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/highscores", true);
+    xhr.setRequestHeader("Content-type", "application/json");
+    xhr.onreadystatechange = function(){
+      if(xhr.readyState == XMLHttpRequest.DONE){
+        updateScoreboard();
+      }
+    };
+    xhr.send(JSON.stringify({
+      playerName: this.name.length > 1 ? this.name.substring(0, this.name.length-1) : PLAYER_NO_NAME,
+      playerScore: scoreKeeper.score,
+      playerTime: gameTimer.getSeconds()
+    }));
   }
 }
 
@@ -196,6 +198,7 @@ class AudioHelper {
 
     // Sound Effects
     this.tongue = sounds['audio/sound-effects/tongue-sound.mp3'];
+    this.tongue.volume = 0.6;
 
     this.waspHit = sounds['audio/sound-effects/wasp-hit-sound.mp3'];
 
@@ -482,6 +485,77 @@ class InsectSpawner {
         this.ladybugs--;
       }
       this.insects.splice(index, 1);
+    }
+  }
+}
+/*
+* Ripple Spawner
+*/
+class RippleSpawner{
+  constructor(){
+    this.ripples = [];
+  }
+  initSpawn(){
+    gameTimer.addEvent(3, function(){
+      rippleSpawner.rippleMonitor();
+    });
+  }
+  rippleMonitor(){
+    let numToSpawn = getRandomInt(0,3);
+
+    for(let i = 0; i <= numToSpawn; i++){
+      let randomX = getRandomInt(1,10);
+      let randomY = getRandomInt(1,10);
+      this.ripples.push(new Ripple(randomX/10*GAME_WIDTH, randomY/10*GAME_HEIGHT));
+    }
+
+    gameTimer.addEvent(3, function(){
+      rippleSpawner.rippleMonitor();
+    });
+  }
+  removeRipple(ripple){
+    let index = this.ripples.indexOf(ripple);
+    if(index > -1){
+      this.ripples.splice(index, 1);
+    }
+  }
+  animateAll(delta){
+    for(let ripple of this.ripples){
+      ripple.animate(delta);
+    }
+  }
+}
+/*
+* Ripple Spawner
+*/
+class Ripple{
+  constructor(posX, posY){
+    this.x = posX;
+    this.y = posY;
+    this.innerRadius = 2;
+    this.outerRadius = 8;
+    this.alpha = 1;
+    this.doneAnimating = false;
+    this.circles = new PIXI.Graphics();
+    this.circles.lineStyle(2, 0xFFFFFF, this.alpha);
+    this.circles.drawCircle(this.x, this.y, this.innerRadius);
+    this.circles.lineStyle(1, 0xFFFFFF, this.alpha);
+    this.circles.drawCircle(this.x, this.y, this.outerRadius);
+    this.circles.displayGroup = rippleGroup;
+    gameScene.addChild(this.circles);
+  }
+  animate(delta){
+    this.circles.clear();
+    this.innerRadius += 50 * (delta/1000);
+    this.outerRadius += 55 * (delta/1000);
+    this.alpha -= 0.35 * (delta/1000);
+    if(this.alpha > 0){
+      this.circles.lineStyle(2, 0xFFFFFF, this.alpha);
+      this.circles.drawCircle(this.x, this.y, this.innerRadius);
+      this.circles.lineStyle(1, 0xFFFFFF, this.alpha);
+      this.circles.drawCircle(this.x, this.y, this.outerRadius);
+    } else {
+      rippleSpawner.removeRipple(this);
     }
   }
 }

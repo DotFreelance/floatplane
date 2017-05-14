@@ -20,31 +20,30 @@ a {
 
 #highScores {
   margin-left: 50px;
-  margin-bottom: 50px;
   order: 2;
 }
 #highScores > h1 {
   font-family: "BadMedicine-Regular";
   text-align: center;
   font-size: 32pt;
-  margin-bottom: 0;
+  /*color: #EA212E;*/
+  margin-bottom: 10px;
 }
 #highScores > table {
+  margin: 0 10px;
   border-collapse: collapse;
   border-spacing: 0px;
-  border-bottom: 1px solid white;
-  background: darkred;
+  border-bottom: 2px solid #7C5E41;
 }
 #highScores > table, th, td {
   padding: 5px 15px;
   font-family: "BadMedicine-Regular";
-  color: white;
 }
 #highScores > table th {
   font-size: 24pt;
 }
 #highScores > table tr {
-  border-top: 1px solid white;
+  border-top: 2px solid #7C5E41;
   font-size: 18pt;
   text-align: center;
 }
