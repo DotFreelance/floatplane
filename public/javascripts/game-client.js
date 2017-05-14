@@ -12,6 +12,7 @@ PIXI.loader
   .add("images/static-sprites/lilypad.png")
   .add("images/ui-sprites/bog-brunch-title.png")
   .add("images/ui-sprites/play-button.png")
+  .add("images/ui-sprites/play-button2.png")
   .add("images/ui-sprites/audio-on-black.png")
   .add("images/ui-sprites/audio-off-black.png")
   .add("images/ui-sprites/audio-on-white.png")
@@ -87,11 +88,28 @@ function setup(){
   titleScene.addChild(titleLogo);
 
   // Play button
-  let playButton = new PIXI.Sprite(
-    PIXI.loader.resources["images/ui-sprites/play-button.png"].texture
-  );
+  // let playButton = new PIXI.Sprite(
+  //   PIXI.loader.resources["images/ui-sprites/play-button.png"].texture
+  // );
+  // let playButtonHover = new PIXI.Sprite(
+  //   PIXI.loader.resources["images/ui-sprites/play-button2.png"].texture
+  // );
+  var playButton = new PIXI.MovieClip([
+    PIXI.loader.resources["images/ui-sprites/play-button.png"].texture,
+    PIXI.loader.resources["images/ui-sprites/play-button2.png"].texture
+  ]);
   playButton.interactive = true;
   playButton.buttonMode = true;
+  stage.interactive = true;
+  playButton.gotoAndStop(0);
+  playButton.mouseover = function(data) {
+    //Display the hover texture
+    playButton.gotoAndStop(1);
+  }
+  playButton.mouseout = function(data) {
+    //Display the normal texture
+    playButton.gotoAndStop(0);
+  }
   playButton.on("pointerdown", startGame);
   playButton.anchor.set(0.5);
   playButton.position.set(GAME_WIDTH/2, GAME_HEIGHT/2.3+playButton.height/2);
