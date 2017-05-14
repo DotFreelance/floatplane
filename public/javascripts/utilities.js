@@ -232,10 +232,10 @@ function hitTestRectangle(r1, r2) {
   r2.centerY = r2.toGlobal(globalZero).y;
 
   //Find the half-widths and half-heights of each sprite
-  r1.halfWidth = r1.width / 2;
-  r1.halfHeight = r1.height / 2;
-  r2.halfWidth = r2.width / 2;
-  r2.halfHeight = r2.height / 2;
+  r1.halfWidth = r1.width*HITBOX_SIZE_FACTOR / 2;
+  r1.halfHeight = r1.height*HITBOX_SIZE_FACTOR / 2;
+  r2.halfWidth = r2.width*HITBOX_SIZE_FACTOR / 2;
+  r2.halfHeight = r2.height*HITBOX_SIZE_FACTOR / 2;
 
   //Calculate the distance vector between the sprites
   vx = r1.centerX - r2.centerX;
@@ -266,4 +266,15 @@ function hitTestRectangle(r1, r2) {
 
   //`hit` will be either `true` or `false`
   return hit;
+};
+
+function updateScoreboard() {
+  let xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function(){
+    if (this.readyState == XMLHttpRequest.DONE && this.status == 200) {
+      document.getElementById("scores-insert").innerHTML = JSON.parse(this.responseText).rendered;
+    }
+  };
+  xhr.open("GET", "/api/highscores", true);
+  xhr.send();
 };

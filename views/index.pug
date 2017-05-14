@@ -7,22 +7,15 @@ block content
     div(id='gameContainer')
       div(id='stats-overlay')
     div(id='highScores')
-      h1 High Scores
+      h1 Scoreboard
       table
         thead
           tr
             th Player
             th Score
             th Time
-        tbody
-          each score in highscores
-            tr
-              - var minutes = Math.floor(score.playerTime / 60);
-              - var seconds = score.playerTime % 60;
-              - seconds = seconds < 10 ? "0" + seconds : seconds
-              td= score.playerName
-              td= score.playerScore
-              td= minutes + ":" + seconds
+        tbody(id='scores-insert')
+          include partials/scores.pug
   div(id='footer')
     p #[strong Music Modified from Original Production, By:] 
     | Spy Real High by Admiral Bob (c) copyright 2017 Licensed under a Creative Commons Attribution Noncommercial (3.0) license. http://dig.ccmixter.org/files/admiralbob77/55913 Ft: Quarkstar
