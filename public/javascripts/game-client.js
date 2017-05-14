@@ -12,8 +12,38 @@ PIXI.loader
   .add("images/static-sprites/lilypad.png")
   .add("images/ui-sprites/bog-brunch-title.png")
   .add("images/ui-sprites/play-button.png")
+  .add("images/ui-sprites/audio-on-black.png")
+  .add("images/ui-sprites/audio-off-black.png")
+  .add("images/ui-sprites/audio-on-white.png")
+  .add("images/ui-sprites/audio-off-white.png")
   .on('progress', loadProgressHandler)
-  .load(setup);
+  .load(function(){
+    loaderChecklist.graphics = true;
+    let ready = true;
+    for(let key in loaderChecklist){
+      if(!loaderChecklist[key]) ready = false;
+    }
+    if(ready) setup();
+  });
+
+/*
+* kittykatattack sounds loader
+*/
+sounds.load([
+  'audio/music/BogBrunchIntroSong.mp3',
+  'audio/music/BBGameMusic.mp3',
+  'audio/music/coolcrickets.mp3',
+  'audio/sound-effects/tongue-sound.mp3',
+  'audio/sound-effects/wasp-hit-sound.mp3'
+]);
+sounds.whenLoaded = function(){
+  loaderChecklist.audio = true;
+  let ready = true;
+  for(let key in loaderChecklist){
+    if(!loaderChecklist[key]) ready = false;
+  }
+  if(ready) setup();
+};
 
 /*
 * Loading Progress
@@ -68,10 +98,10 @@ function setup(){
   titleScene.addChild(playButton);
 
   // Add the scenes to the stage
-  stage.addChild(uiScene);
   stage.addChild(titleScene);
   stage.addChild(gameScene);
   stage.addChild(gameOverScene);
+  stage.addChild(uiScene);
 
   // Set up the layers
   gameScene.displayList = new PIXI.DisplayList();
@@ -150,6 +180,7 @@ function play(){
     // Check for collision between player and enemy
     if(insect.isEnemy){
       if(hitTestRectangle(player.sprite, insect.sprite) && !player.invin){
+        audioHelper.waspHitSound();
         endGame();
       }
     }
@@ -260,6 +291,13 @@ function initGame(){
   // Bind the keys for the title screen
   bindTitleKeys();
 
+  // Initialize the audio helper
+  audioHelper = new AudioHelper(audioHelper ? audioHelper.isMuted() : false);
+
+  audioHelper.stopGameMusic();
+  // Play the intro music
+  audioHelper.startIntroMusic();
+
   // Setup the title screen
   titleScene.visible = true;
   gameScene.visible = false;
@@ -291,6 +329,9 @@ function startGame(){
   // Lay out the static sprites
   staticSpriteLayout();
 
+  // Use black audio icons
+  audioHelper.blackIcons();
+
   // Create the scorekeeper
   scoreKeeper = new ScoreKeeper();
 
@@ -306,6 +347,9 @@ function startGame(){
   // Create InsectSpawner and initialize the gameboard with spawns
   insectSpawner = new InsectSpawner();
   insectSpawner.initSpawn();
+
+  // Start the main music
+  audioHelper.startGameMusic();
 
   // Make the correct scenes visible
   titleScene.visible = false;
@@ -328,6 +372,8 @@ function endGame(){
   gameOverScene.visible = true;
   // Set the background
   renderer.backgroundColor = GAME_OVER_BACKGROUND_COLOR;
+  // Use white audio icons
+  audioHelper.whiteIcons();
   // Add the game over message to the end scene
   gameOverMessage = new PIXI.Text(
     "GAME OVER!",

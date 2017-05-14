@@ -45,8 +45,12 @@ const GAME_WIDTH = 900,
 
 // Game object Globals
 var renderer, stage, titleScene, uiScene, gameScene, gameOverScene, gameOverMessage, gameState, player, scoreKeeper,
-    scoreSubmitter, gameTimer, insectSpawner, playerTongue, playerTongueTip, testInsect;
+    scoreSubmitter, gameTimer, insectSpawner, playerTongue, playerTongueTip, testInsect, audioHelper;
 var boundKeys = [];
+var loaderChecklist = {
+  graphics: false,
+  audio: false
+};
 
 // Global Groups
 var tongueGroup = null;

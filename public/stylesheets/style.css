@@ -1,5 +1,5 @@
 body {
-  padding: 50px;
+  padding: 10px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -9,19 +9,19 @@ a {
 
 #mainContainer {
   position: relative;
+  display: flex;
+  margin-bottom: 20px;
 }
 
 #gameContainer {
   position: relative;
-  display: inline-block;
-  float: left;
+  order: 1;
 }
 
 #highScores {
   margin-left: 50px;
   margin-bottom: 50px;
-  display: inline-block;
-  float: left;
+  order: 2;
 }
 #highScores > h1 {
   font-family: "BadMedicine-Regular";
@@ -47,4 +47,8 @@ a {
   border-top: 1px solid white;
   font-size: 18pt;
   text-align: center;
+}
+
+#footer {
+  border-top: 1px solid grey;
 }
