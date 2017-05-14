@@ -4,23 +4,6 @@ var mongoClient = require('mongodb').MongoClient;
 var env = process.env.NODE_ENV || 'development';
 var config = require('./../config')[env];
 
-router.get('/', (req, res, next) => {
-  let dbmessage = "Failed to connect to MongoDB.";
-  mongoClient.connect(config.database.host, (err, db) => {
-    if(err === null){
-      dbmessage = "Successfully connected to MongoDB!";
-    }
-    res.status(200).json({
-      meta: {
-        success: true,
-        message: 'You have successfully connected to the Bog Brunch score API!',
-        database: dbmessage
-      }
-    });
-    db.close();
-  });
-});
-
 /*
 * GET /highscores
 */
@@ -29,7 +12,9 @@ router.get('/highscores', (req, res, next) => {
     if(err === null){
       db.collection('highscores').find({}, {'sort':[['playerScore','desc']]}).limit(10).toArray((err, docs) => {
         if(err === null){
-          res.status(200).json(docs);
+          res.render('partials/scores', {highscores: docs}, function(err, html){
+              res.status(200).json({data: docs, rendered: html});
+          });
         } else {
           res.status(500);
         }
@@ -45,16 +30,32 @@ router.get('/highscores', (req, res, next) => {
 router.post('/highscores', (req, res, next) => {
   mongoClient.connect(config.database.host, (err, db) => {
     if(err === null){
-      db.collection('highscores').insert(req.body, (err) => {
-        if(err === null){
-          res.status(201);
-        } else {
-          res.status(500);
-        }
-      });
+      res.sendStatus(202);
+      db.collection('highscores').insert(req.body);
     } else {
-      res.status(500);
+      res.sendStatus(500);
     }
+    db.close();
+  });
+});
+
+
+/*
+* GET /
+*/
+router.get('/', (req, res, next) => {
+  let dbmessage = "Failed to connect to MongoDB.";
+  mongoClient.connect(config.database.host, (err, db) => {
+    if(err === null){
+      dbmessage = "Successfully connected to MongoDB!";
+    }
+    res.status(200).json({
+      meta: {
+        success: true,
+        message: 'You have successfully connected to the Bog Brunch score API!',
+        database: dbmessage
+      }
+    });
     db.close();
   });
 });
