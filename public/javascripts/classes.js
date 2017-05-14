@@ -457,7 +457,7 @@ class InsectSpawner {
       this.spawn(new Wasp());
     }
 
-    gameTimer.addEvent(3, function(){
+    gameTimer.addEvent(2, function(){
       insectSpawner.spawnMonitor();
     });
   }
