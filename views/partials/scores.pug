@@ -1,8 +1,12 @@
-each score in highscores
+//- This is a partial template that allows me to serve this section only to XMLHttpRequests so they can
+//- update their content dynamically
+
+each score,index in highscores
   tr
     - var minutes = Math.floor(score.playerTime / 60);
     - var seconds = score.playerTime % 60;
     - seconds = seconds < 10 ? "0" + seconds : seconds
+    td= index+1
     td= score.playerName
     td= score.playerScore
     td= minutes + ":" + seconds

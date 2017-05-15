@@ -1,5 +1,6 @@
 /*
 * Player Object
+* Manages everything about the player
 */
 class Player {
   constructor(sprite){
@@ -34,6 +35,7 @@ class Player {
 
 /*
 * Timer Object
+* This is core to the timing of all game related functionality and maintains an Event Queue as well.
 */
 class Timer {
   constructor(){
@@ -112,6 +114,7 @@ class Timer {
 
 /*
 * ScoreKeeper Object
+* Simple construct gives us a central place to maintain the player score.
 */
 class ScoreKeeper {
   constructor(){
@@ -138,6 +141,7 @@ class ScoreKeeper {
 
 /*
 * ScoreSubmitter Object
+* This is instantiated when we need to take a name from the player and submit a score.
 */
 class ScoreSubmitter {
   constructor(){
@@ -180,6 +184,7 @@ class ScoreSubmitter {
 
 /*
 * AudioHelper Object
+* Large class, handles all of the audio heard in the game including mute/unmute function.
 */
 class AudioHelper {
   constructor(muteState){
@@ -350,6 +355,7 @@ class AudioHelper {
 
 /*
 * Insect Object
+* The parent object for all insects.
 */
 class Insect{
   constructor(name, sprite, points) {
@@ -407,7 +413,7 @@ class Wasp extends Insect {
 }
 /*
 * InsectSpawner Object
-* Maintains the number of insects in play
+* Maintains the number of insects in play, this is where the difficulty levels are applied.
 */
 
 class InsectSpawner {
@@ -490,6 +496,7 @@ class InsectSpawner {
 }
 /*
 * Ripple Spawner
+* Just to maintain the subtle ripples that happen randomly about the map
 */
 class RippleSpawner{
   constructor(){
@@ -526,7 +533,8 @@ class RippleSpawner{
   }
 }
 /*
-* Ripple Spawner
+* Ripple
+* A manager for the individual properties of a Ripple object.
 */
 class Ripple{
   constructor(posX, posY){

@@ -4,7 +4,7 @@ const GAME_WIDTH = 900,
       GAME_BACKGROUND_COLOR = 0xCEEAE9,
       GAME_OVER_BACKGROUND_COLOR = 0x000000,
       GAME_FONT = "BadMedicine-Regular",
-      HITBOX_SIZE_FACTOR = 0.7,
+      HITBOX_SIZE_FACTOR = 0.7, // Decreasing this makes the hit-registry less sensitive
       PLAYER_NO_NAME = "unnamed",
       PLAYER_VELOCITY = 200,
       PLAYER_TONGUE_COLOR = 0xFF9999,
@@ -25,8 +25,8 @@ const GAME_WIDTH = 900,
         width: GAME_WIDTH,
         height: GAME_HEIGHT,
       },
+      // Add or remove the lilypads here
       STATIC_SPRITES_LAYOUT = {
-        ripples: [],
         lilypads: [
           {x: GAME_WIDTH*2/10, y: GAME_HEIGHT/10, scale: 0.2, rotation: 0.0},
           {x: GAME_WIDTH*1.2/10, y: GAME_HEIGHT/10, scale: 0.13, rotation: 1.57},
@@ -37,6 +37,8 @@ const GAME_WIDTH = 900,
           {x: GAME_WIDTH*8/10, y: GAME_HEIGHT*8.7/10, scale: 0.13, rotation: 4.10},
         ]
       },
+      // At the time specified, sets the max number allowable of each insect type
+      // Generally wasps go up while food goes down
       STAGES_OF_DIFFICULTY = [
         {time: 15, flies: 3, ladybugs: 2, wasps: 3},
         {time: 30, flies: 4, ladybugs: 2, wasps: 4},
@@ -52,6 +54,7 @@ var loaderChecklist = {
   graphics: false,
   audio: false
 };
+var stats = new Stats();
 
 // Global Groups
 var tongueGroup = null;
