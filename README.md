@@ -10,7 +10,7 @@ A game where you munch a brunch.
 ### Rules:
 - The flies are worth 25 points.
 - The ladybugs are worth 50 points.
-- The bees are your enemy, avoid them and certainly don't eat them!
+- The wasps are your enemy, avoid them and certainly don't eat them!
 
 **Play it here: https://aqueous-refuge-74804.herokuapp.com/**  
 _Please be patient if it takes a few moments to load, the free tier of Heroku sleeps when not in use and must restart after waking._
