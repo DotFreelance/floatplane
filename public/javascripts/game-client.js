@@ -1,5 +1,3 @@
-// Globals
-var stats = new Stats();
 
 /*
 * The PIXI game assets loader
@@ -19,6 +17,9 @@ PIXI.loader
   .add("images/ui-sprites/audio-off-white.png")
   .on('progress', loadProgressHandler)
   .load(function(){
+    // This loader sets itself to ready = true, then checks the others, if
+    // the others aren't ready, it does nothing
+    // This way the last loader is the one that ends up calling setup
     loaderChecklist.graphics = true;
     let ready = true;
     for(let key in loaderChecklist){
@@ -38,6 +39,9 @@ sounds.load([
   'audio/sound-effects/wasp-hit-sound.mp3'
 ]);
 sounds.whenLoaded = function(){
+  // This loader sets itself to ready = true, then checks the others, if
+  // the others aren't ready, it does nothing
+  // This way the last loader is the one that ends up calling setup
   loaderChecklist.audio = true;
   let ready = true;
   for(let key in loaderChecklist){
@@ -49,6 +53,7 @@ sounds.whenLoaded = function(){
 /*
 * Loading Progress
 *
+* PIXI loading progress handler.
 * Performs an action whenever a resource is loaded.
 */
 function loadProgressHandler(loader, resource) {
@@ -88,12 +93,6 @@ function setup(){
   titleScene.addChild(titleLogo);
 
   // Play button
-  // let playButton = new PIXI.Sprite(
-  //   PIXI.loader.resources["images/ui-sprites/play-button.png"].texture
-  // );
-  // let playButtonHover = new PIXI.Sprite(
-  //   PIXI.loader.resources["images/ui-sprites/play-button2.png"].texture
-  // );
   var playButton = new PIXI.MovieClip([
     PIXI.loader.resources["images/ui-sprites/play-button.png"].texture,
     PIXI.loader.resources["images/ui-sprites/play-button2.png"].texture
@@ -101,7 +100,6 @@ function setup(){
   playButton.interactive = true;
   playButton.buttonMode = true;
   stage.interactive = true;
-  playButton.gotoAndStop(0);
   playButton.mouseover = function(data) {
     //Display the hover texture
     playButton.gotoAndStop(1);
@@ -121,7 +119,7 @@ function setup(){
   stage.addChild(gameOverScene);
   stage.addChild(uiScene);
 
-  // Set up the layers
+  // Set up the visual layers
   gameScene.displayList = new PIXI.DisplayList();
   tongueGroup = new PIXI.DisplayGroup(0, true);
   interactiveGroup = new PIXI.DisplayGroup(1, true);
@@ -148,34 +146,41 @@ function setup(){
   // Initialize the game
   initGame();
 
-  // Begin running the game
+  // Begin running the game render loop
   renderLoop();
 }
 
 /*
 * Primary rendering loop
+*
+* This is where the game actually runs
 */
 function renderLoop(){
-  //Loop this function at 60 frames per second
+  //Loop this function at <refresh_rate> frames per second
   requestAnimationFrame(renderLoop);
-  // Show the stats panel
+  // Record stats panel info (fps)
   stats.begin();
 
+  // May be: title(), play(), or end()
   gameState();
 
   //Render the stage to see the animation
   renderer.render(stage);
   stats.end();
 }
+
+
+
+
 /*
-* The title intro
+* STATE: The title intro
 */
 function title(){
   // Title scene has no rendering tasks
 }
 
 /*
-* The play-state action loop
+* STATE: The play-state action loop
 */
 function play(){
   // Frame delta
@@ -227,197 +232,8 @@ function play(){
 }
 
 /*
-* The game-end action loop
+* STATE: The game-end action loop
 */
 function end(){
   // End game scene has no rendering tasks
-}
-
-/*
-* Player attack animation
-*/
-function playerAttackAnimation(delta){
-  let prevAttackCounter = player.attackCounter;
-  player.attackCounter += (delta / 1000);
-  let t = player.attackCounter / PLAYER_ATTACK_ANIMATION_LENGTH;
-  if(prevAttackCounter == 0){
-    // Create the two parts of the tongue
-    playerTongue = new PIXI.Graphics();
-    playerTongueTip = new PIXI.Graphics();
-    playerTongue.lineStyle(PLAYER_TONGUE_WIDTH, PLAYER_TONGUE_COLOR, 1);
-    playerTongueTip.lineStyle(0, PLAYER_TONGUE_COLOR, 1);
-    // Draw the tongue line
-    playerTongue.moveTo(PLAYER_MOUTH_X, PLAYER_MOUTH_Y);
-    playerTongue.lineTo(PLAYER_MOUTH_X, PLAYER_MOUTH_Y - PLAYER_TONGUE_LENGTH * t);
-    // Draw the tongue tip
-    playerTongueTip.beginFill(PLAYER_TONGUE_COLOR, 1);
-    playerTongueTip.drawCircle(PLAYER_MOUTH_X, PLAYER_MOUTH_Y + 10 - PLAYER_TONGUE_LENGTH * t, 20);
-    playerTongueTip.endFill();
-    // Add both parts to the player sprite
-    player.sprite.addChild(playerTongue);
-    player.sprite.addChild(playerTongueTip);
-    // Add both parts to the tongue layer
-    playerTongue.displayGroup = tongueGroup;
-    playerTongueTip.displayGroup = tongueGroup;
-
-  } else if(player.attackCounter > PLAYER_ATTACK_ANIMATION_LENGTH){
-
-    player.sprite.removeChild(playerTongue);
-    player.sprite.removeChild(playerTongueTip);
-    player.attacking = false;
-    player.attackCounter = 0;
-
-  } else {
-    // Draw the tongue line
-    playerTongue.moveTo(PLAYER_MOUTH_X, PLAYER_MOUTH_Y);
-    playerTongue.lineTo(PLAYER_MOUTH_X, PLAYER_MOUTH_Y - PLAYER_TONGUE_LENGTH * t);
-    // Move the tongue tip to the end of the tongue
-    playerTongueTip.y = -PLAYER_TONGUE_LENGTH * t;
-    // Add the new tongue line
-    player.sprite.addChild(playerTongue);
-    // Add new tongue line to tongue layer
-    playerTongue.displayGroup = tongueGroup;
-    // Test for a hit between the tongue tip and the insects
-    for(let insect of insectSpawner.insects){
-      if(hitTestRectangle(playerTongueTip, insect.sprite)){
-        player.sprite.removeChild(playerTongue);
-        player.sprite.removeChild(playerTongueTip);
-        player.attacking = false;
-        player.attackCounter = 0;
-        player.eat(insect);
-      }
-    }
-  }
-}
-
-/*
-* Static Sprite layout happens here.
-* Static sprites are any texture or sprite that just adds flavor to the world.
-*/
-function staticSpriteLayout(){
-
-  // Lilypads
-  for(let n = 0; n < STATIC_SPRITES_LAYOUT.lilypads.length; n++){
-    let newLilypad = new PIXI.Sprite(
-      PIXI.loader.resources["images/static-sprites/lilypad.png"].texture
-    );
-    gameScene.addChild(newLilypad);
-    newLilypad.anchor.set(0.5);
-    newLilypad.scale.set(STATIC_SPRITES_LAYOUT.lilypads[n].scale);
-    newLilypad.rotation = STATIC_SPRITES_LAYOUT.lilypads[n].rotation;
-    newLilypad.position.set(STATIC_SPRITES_LAYOUT.lilypads[n].x, STATIC_SPRITES_LAYOUT.lilypads[n].y);
-    newLilypad.displayGroup = staticGroup;
-  }
-}
-
-/*
-* Initialize the game with the necessary objects
-*/
-function initGame(){
-  // Bind the keys for the title screen
-  bindTitleKeys();
-
-  // Initialize the audio helper
-  audioHelper = new AudioHelper(audioHelper ? audioHelper.isMuted() : false);
-
-  audioHelper.stopGameMusic();
-  // Play the intro music
-  audioHelper.startIntroMusic();
-
-  // Setup the title screen
-  titleScene.visible = true;
-  gameScene.visible = false;
-  gameOverScene.visible = false;
-  renderer.backgroundColor = GAME_TITLE_BACKGROUND_COLOR;
-
-  // Set the game state
-  gameState = title;
-}
-
-/*
-* Reset the game
-*/
-function resetGame(){
-  // Clear scenes
-  gameScene.removeChildren();
-  uiScene.removeChildren();
-  // Initialize a new game
-  initGame();
-}
-
-/*
-* Set up the game to begin
-*/
-function startGame(){
-  // Setup player controls
-  bindPlayerKeys();
-
-  // Lay out the static sprites
-  staticSpriteLayout();
-
-  // Use black audio icons
-  audioHelper.blackIcons();
-
-  // Create the timer
-  gameTimer = new Timer();
-
-  // Create the scorekeeper
-  scoreKeeper = new ScoreKeeper();
-
-  // Instantiate the player with player sprite
-  player = new Player();
-  player.sprite.displayGroup = interactiveGroup;
-  // Turn off invin after a few seconds
-  gameTimer.addEvent(3, function(){ player.invin = false; });
-
-  // Create InsectSpawner and initialize the gameboard with spawns
-  insectSpawner = new InsectSpawner();
-  insectSpawner.initSpawn();
-
-  // Spawn some ripples
-  rippleSpawner = new RippleSpawner();
-  rippleSpawner.initSpawn();
-
-  // Start the main music
-  audioHelper.startGameMusic();
-
-  // Make the correct scenes visible
-  titleScene.visible = false;
-  gameScene.visible = true;
-  gameOverScene.visible = false;
-  // Set the background
-  renderer.backgroundColor = GAME_BACKGROUND_COLOR;
-  // Start the timer and set to play
-  gameTimer.start();
-  gameState = play;
-}
-
-/*
-* Set up the game to end
-*/
-function endGame(){
-  // Make the correct scenes visible
-  titleScene.visible = false;
-  gameScene.visible = false;
-  gameOverScene.visible = true;
-  // Set the background
-  renderer.backgroundColor = GAME_OVER_BACKGROUND_COLOR;
-  // Use white audio icons
-  audioHelper.whiteIcons();
-  // Add the game over message to the end scene
-  gameOverMessage = new PIXI.Text(
-    "GAME OVER!",
-    {fontFamily: GAME_FONT, fontSize: 60, fill: 0xEA212E}
-  );
-  gameOverMessage.position.set(GAME_WIDTH/2-gameOverMessage.width/2, GAME_HEIGHT/2-gameOverMessage.height);
-  gameOverScene.addChild(gameOverMessage);
-  // Create a score ScoreSubmitter
-  scoreSubmitter = new ScoreSubmitter();
-  // Bind the end-game keys
-  bindEndKeys();
-  // Stop the timer and set to end
-  gameTimer.stop();
-  gameTimer.whiteText();
-  scoreKeeper.whiteText();
-  gameState = end;
 }

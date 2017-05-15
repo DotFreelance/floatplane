@@ -1,22 +1,36 @@
 extends layout
 
 block content
-  h3 Instructions: 'M' or click to mute audio. Use your #[strong arrow keys] to move, #[strong space bar] to lash your tongue. #[strong Watch out for wasps!]
-  p This game uses #[a(href='http://www.pixijs.com/') Pixi.js] as a framework on WebGL and Canvas. #[strong This game will invoke your GPU!]
   div(id='mainContainer')
     div(id='gameContainer')
       div(id='stats-overlay')
     div(id='highScores')
+      p This game uses #[a(href='http://www.pixijs.com/') Pixi.js] as a framework on WebGL and Canvas. 
+      | #[strong This game will invoke your GPU!]
+      h3 Instructions: 
+      ul
+        li #[strong 'M' or click] to mute audio.
+        li Use your #[strong ARROW KEYS] to move, #[strong SPACE] to lash your tongue.
+        li Press #[strong SPACE] to start the game, and at the end type in your 
+        | name and press #[strong ENTER]
+      h3 Rules:
+      ul
+        li Flies are 25 points
+        li Ladybugs are 50 points
+        li #[strong Watch out for wasps!]
+      
       h1 Scoreboard
       table
         thead
           tr
+            th #
             th Player
             th Score
             th Time
         tbody(id='scores-insert')
           include partials/scores.pug
   div(id='footer')
+    p Produced by #[strong Paul Jarrow] [ #[a(href='https://dotfreelance.github.io') dotfreelance.github.io] ]
     p #[strong Music Modified from Original Production, By:] 
     | Spy Real High by Admiral Bob (c) copyright 2017 Licensed under a Creative Commons Attribution Noncommercial (3.0) license. http://dig.ccmixter.org/files/admiralbob77/55913 Ft: Quarkstar
         
