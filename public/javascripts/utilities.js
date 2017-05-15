@@ -1,3 +1,193 @@
+
+/*
+* Set up the game to begin
+*/
+function startGame(){
+  // Setup player controls
+  bindPlayerKeys();
+
+  // Lay out the static sprites
+  staticSpriteLayout();
+
+  // Use black audio icons
+  audioHelper.blackIcons();
+
+  // Create the timer
+  gameTimer = new Timer();
+
+  // Create the scorekeeper
+  scoreKeeper = new ScoreKeeper();
+
+  // Instantiate the player with player sprite
+  player = new Player();
+  player.sprite.displayGroup = interactiveGroup;
+  // Turn off invin after a few seconds
+  gameTimer.addEvent(3, function(){ player.invin = false; });
+
+  // Create InsectSpawner and initialize the gameboard with spawns
+  insectSpawner = new InsectSpawner();
+  insectSpawner.initSpawn();
+
+  // Spawn some ripples
+  rippleSpawner = new RippleSpawner();
+  rippleSpawner.initSpawn();
+
+  // Start the main music
+  audioHelper.startGameMusic();
+
+  // Make the correct scenes visible
+  titleScene.visible = false;
+  gameScene.visible = true;
+  gameOverScene.visible = false;
+  // Set the background
+  renderer.backgroundColor = GAME_BACKGROUND_COLOR;
+  // Start the timer and set to play
+  gameTimer.start();
+  gameState = play;
+}
+
+/*
+* Set up the game to end
+*/
+function endGame(){
+  // Make the correct scenes visible
+  titleScene.visible = false;
+  gameScene.visible = false;
+  gameOverScene.visible = true;
+  // Set the background
+  renderer.backgroundColor = GAME_OVER_BACKGROUND_COLOR;
+  // Use white audio icons
+  audioHelper.whiteIcons();
+  // Add the game over message to the end scene
+  gameOverMessage = new PIXI.Text(
+    "GAME OVER!",
+    {fontFamily: GAME_FONT, fontSize: 60, fill: 0xEA212E}
+  );
+  gameOverMessage.position.set(GAME_WIDTH/2-gameOverMessage.width/2, GAME_HEIGHT/2-gameOverMessage.height);
+  gameOverScene.addChild(gameOverMessage);
+  // Create a score ScoreSubmitter
+  scoreSubmitter = new ScoreSubmitter();
+  // Bind the end-game keys
+  bindEndKeys();
+  // Stop the timer and set to end
+  gameTimer.stop();
+  gameTimer.whiteText();
+  scoreKeeper.whiteText();
+  gameState = end;
+}
+
+/*
+* Initialize the game with the necessary objects
+*/
+function initGame(){
+  // Bind the keys for the title screen
+  bindTitleKeys();
+
+  // Initialize the audio helper
+  audioHelper = new AudioHelper(audioHelper ? audioHelper.isMuted() : false);
+
+  audioHelper.stopGameMusic();
+  // Play the intro music
+  audioHelper.startIntroMusic();
+
+  // Setup the title screen
+  titleScene.visible = true;
+  gameScene.visible = false;
+  gameOverScene.visible = false;
+  renderer.backgroundColor = GAME_TITLE_BACKGROUND_COLOR;
+
+  // Set the game state
+  gameState = title;
+}
+
+/*
+* Reset the game
+*/
+function resetGame(){
+  // Clear scenes
+  gameScene.removeChildren();
+  uiScene.removeChildren();
+  // Initialize a new game
+  initGame();
+}
+
+/*
+* Player attack animation and hit testing
+*/
+function playerAttackAnimation(delta){
+  let prevAttackCounter = player.attackCounter;
+  player.attackCounter += (delta / 1000);
+  let t = player.attackCounter / PLAYER_ATTACK_ANIMATION_LENGTH;
+  if(prevAttackCounter == 0){
+    // Create the two parts of the tongue
+    playerTongue = new PIXI.Graphics();
+    playerTongueTip = new PIXI.Graphics();
+    playerTongue.lineStyle(PLAYER_TONGUE_WIDTH, PLAYER_TONGUE_COLOR, 1);
+    playerTongueTip.lineStyle(0, PLAYER_TONGUE_COLOR, 1);
+    // Draw the tongue line
+    playerTongue.moveTo(PLAYER_MOUTH_X, PLAYER_MOUTH_Y);
+    playerTongue.lineTo(PLAYER_MOUTH_X, PLAYER_MOUTH_Y - PLAYER_TONGUE_LENGTH * t);
+    // Draw the tongue tip
+    playerTongueTip.beginFill(PLAYER_TONGUE_COLOR, 1);
+    playerTongueTip.drawCircle(PLAYER_MOUTH_X, PLAYER_MOUTH_Y + 10 - PLAYER_TONGUE_LENGTH * t, 20);
+    playerTongueTip.endFill();
+    // Add both parts to the player sprite
+    player.sprite.addChild(playerTongue);
+    player.sprite.addChild(playerTongueTip);
+    // Add both parts to the tongue layer
+    playerTongue.displayGroup = tongueGroup;
+    playerTongueTip.displayGroup = tongueGroup;
+
+  } else if(player.attackCounter > PLAYER_ATTACK_ANIMATION_LENGTH){
+
+    player.sprite.removeChild(playerTongue);
+    player.sprite.removeChild(playerTongueTip);
+    player.attacking = false;
+    player.attackCounter = 0;
+
+  } else {
+    // Draw the tongue line
+    playerTongue.moveTo(PLAYER_MOUTH_X, PLAYER_MOUTH_Y);
+    playerTongue.lineTo(PLAYER_MOUTH_X, PLAYER_MOUTH_Y - PLAYER_TONGUE_LENGTH * t);
+    // Move the tongue tip to the end of the tongue
+    playerTongueTip.y = -PLAYER_TONGUE_LENGTH * t;
+    // Add the new tongue line
+    player.sprite.addChild(playerTongue);
+    // Add new tongue line to tongue layer
+    playerTongue.displayGroup = tongueGroup;
+    // Test for a hit between the tongue tip and the insects
+    for(let insect of insectSpawner.insects){
+      if(hitTestRectangle(playerTongueTip, insect.sprite)){
+        player.sprite.removeChild(playerTongue);
+        player.sprite.removeChild(playerTongueTip);
+        player.attacking = false;
+        player.attackCounter = 0;
+        player.eat(insect);
+      }
+    }
+  }
+}
+
+/*
+* Static Sprite layout happens here.
+* Static sprites are any texture or sprite that just adds flavor to the world.
+*/
+function staticSpriteLayout(){
+
+  // Lilypads
+  for(let n = 0; n < STATIC_SPRITES_LAYOUT.lilypads.length; n++){
+    let newLilypad = new PIXI.Sprite(
+      PIXI.loader.resources["images/static-sprites/lilypad.png"].texture
+    );
+    gameScene.addChild(newLilypad);
+    newLilypad.anchor.set(0.5);
+    newLilypad.scale.set(STATIC_SPRITES_LAYOUT.lilypads[n].scale);
+    newLilypad.rotation = STATIC_SPRITES_LAYOUT.lilypads[n].rotation;
+    newLilypad.position.set(STATIC_SPRITES_LAYOUT.lilypads[n].x, STATIC_SPRITES_LAYOUT.lilypads[n].y);
+    newLilypad.displayGroup = staticGroup;
+  }
+}
+
 /*
 * Functionality for binding keys
 * Code taken from: https://github.com/kittykatattack/learningPixi#sprites
@@ -49,7 +239,7 @@ function keyboard(keyCode) {
 * Unbind all keys so we can start fresh
 */
 function unbindAllKeys(){
-  // Remove event listeners
+  // Remove event listeners from all bound keys
   for(let boundKey of boundKeys){
     window.removeEventListener(
       "keydown", boundKey.downEvent, false
@@ -231,7 +421,8 @@ function hitTestRectangle(r1, r2) {
   r2.centerX = r2.toGlobal(globalZero).x;
   r2.centerY = r2.toGlobal(globalZero).y;
 
-  //Find the half-widths and half-heights of each sprite
+  // Find the half-widths and half-heights of each sprite
+  // note: modiified the width and height by a descale factor found in globals.js
   r1.halfWidth = r1.width*HITBOX_SIZE_FACTOR / 2;
   r1.halfHeight = r1.height*HITBOX_SIZE_FACTOR / 2;
   r2.halfWidth = r2.width*HITBOX_SIZE_FACTOR / 2;
@@ -267,7 +458,9 @@ function hitTestRectangle(r1, r2) {
   //`hit` will be either `true` or `false`
   return hit;
 };
-
+/*
+* Update Scoreboard makes an XHR request to the back end to retrieve a partial and inject it to live update
+*/
 function updateScoreboard() {
   let xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function(){
